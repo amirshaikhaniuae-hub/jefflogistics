@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jeff Logistics — Workforce Solutions for Dutch Logistics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- Loading screen -->
+<div id="site-loader" style="position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="text-align:center;">
+    <img src="logo.png" alt="Jeff Logistics" style="height:48px;margin-bottom:24px;filter:brightness(0) invert(1);display:block;margin-left:auto;margin-right:auto;">
+    <div style="width:180px;height:2px;background:rgba(255,255,255,0.12);border-radius:2px;overflow:hidden;margin:0 auto;">
+      <div id="loader-progress" style="height:100%;width:0;background:#9C7C3F;border-radius:2px;transition:width .08s linear;"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== WHATSAPP FLOAT BUTTON ===== -->
+
+<!-- ===== COOKIE CONSENT BANNER ===== -->
+<div id="cookie-banner" style="display:none;">
+  <div class="cookie-inner">
+    <div class="cookie-text">
+      <p><strong>We use cookies</strong> to improve your experience and analyse site traffic. By continuing, you agree to our use of cookies.</p>
+    </div>
+    <div class="cookie-actions">
+      <button class="btn btn-ghost" onclick="cookieDecline()">Decline</button>
+      <button class="btn btn-primary" onclick="cookieAccept()">Accept all</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TRACKING PAGE ===== -->
+
+<!-- ===== LANGUAGE / COUNTRY OVERLAY ===== -->
+<div id="lang-overlay">
+  <div id="lang-modal">
+    <div class="lang-modal-logo">
+      <img src="logo.png" alt="Jeff Logistics" style="height:40px;">
+    </div>
+    <p class="lang-modal-eyebrow">Jeff Logistics — European Workforce &amp; Shipping</p>
+    <h2 class="lang-modal-title">Select your country</h2>
+    <p class="lang-modal-sub">We'll set the language automatically</p>
+    <div class="lang-country-grid" id="lang-country-grid">
+      <button class="lang-country-btn" data-lang="nl" data-country="Netherlands" onclick="langSelect(this)"><span class="lang-flag">🇳🇱</span><span>Netherlands</span></button>
+      <button class="lang-country-btn" data-lang="de" data-country="Germany" onclick="langSelect(this)"><span class="lang-flag">🇩🇪</span><span>Germany</span></button>
+      <button class="lang-country-btn" data-lang="fr" data-country="France" onclick="langSelect(this)"><span class="lang-flag">🇫🇷</span><span>France</span></button>
+      <button class="lang-country-btn" data-lang="es" data-country="Spain" onclick="langSelect(this)"><span class="lang-flag">🇪🇸</span><span>Spain</span></button>
+      <button class="lang-country-btn" data-lang="it" data-country="Italy" onclick="langSelect(this)"><span class="lang-flag">🇮🇹</span><span>Italy</span></button>
+      <button class="lang-country-btn" data-lang="pl" data-country="Poland" onclick="langSelect(this)"><span class="lang-flag">🇵🇱</span><span>Poland</span></button>
+      <button class="lang-country-btn" data-lang="en" data-country="Belgium" onclick="langSelect(this)"><span class="lang-flag">🇧🇪</span><span>Belgium</span></button>
+      <button class="lang-country-btn" data-lang="en" data-country="Austria" onclick="langSelect(this)"><span class="lang-flag">🇦🇹</span><span>Austria</span></button>
+      <button class="lang-country-btn" data-lang="en" data-country="Sweden" onclick="langSelect(this)"><span class="lang-flag">🇸🇪</span><span>Sweden</span></button>
+      <button class="lang-country-btn" data-lang="en" data-country="Denmark" onclick="langSelect(this)"><span class="lang-flag">🇩🇰</span><span>Denmark</span></button>
+      <button class="lang-country-btn" data-lang="en" data-country="Ireland" onclick="langSelect(this)"><span class="lang-flag">🇮🇪</span><span>Ireland</span></button>
+      <button class="lang-country-btn" data-lang="en" data-country="Other EU" onclick="langSelect(this)"><span class="lang-flag">🇪🇺</span><span>Other EU</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Language switcher (nav) -->
+<div id="lang-switcher" style="display:none;">
+  <button class="lang-switch-btn" id="lang-switch-btn" onclick="langToggleMenu()">
+    <span id="lang-flag-current">🌐</span>
+    <span id="lang-code-current">EN</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:12px;height:12px;"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  <div class="lang-switch-menu" id="lang-switch-menu" style="display:none;">
+    <button onclick="langApply('en','🇬🇧')">🇬🇧 EN</button>
+    <button onclick="langApply('nl','🇳🇱')">🇳🇱 NL</button>
+    <button onclick="langApply('de','🇩🇪')">🇩🇪 DE</button>
+    <button onclick="langApply('fr','🇫🇷')">🇫🇷 FR</button>
+    <button onclick="langApply('es','🇪🇸')">🇪🇸 ES</button>
+    <button onclick="langApply('it','🇮🇹')">🇮🇹 IT</button>
+    <button onclick="langApply('pl','🇵🇱')">🇵🇱 PL</button>
+  </div>
+</div>
+
+
+<nav class="nav">
+  <div class="wrap">
+    <span class="brand-mark" data-page="home">
+      <img src="logo.png" alt="Jeff Logistics" class="logo-mark nav-logo">
+    </span>
+    <div class="nav-links">
+      <a data-page="services" data-i18n="nav_services">Services</a>
+      <a data-page="sectors" data-i18n="nav_sectors">Sectors</a>
+      <a data-page="compliance" data-i18n="nav_compliance">Compliance</a>
+      <a data-page="shipping" data-i18n="nav_shipping">Shipping</a>
+      <a data-page="contact" data-i18n="nav_contact">Contact</a>
+    </div>
+    <div id="lang-nav-slot"></div>
+    <button class="nav-search-btn" id="nav-search-btn" onclick="searchOpen()" aria-label="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+    <button class="dark-mode-btn" id="dark-mode-btn" onclick="toggleDarkMode()" aria-label="Toggle dark mode">
+      <svg id="dm-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg id="dm-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:none;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    </button>
+    <a class="btn btn-ghost nav-cta" data-page="contact"><span data-i18n="cta_request">Request workforce</span></a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ===================== HOME ===================== -->
+<main class="page active" id="page-home">
+
+  <header class="hero">
+    <div class="wrap hero-inner">
+      <div class="eyebrow"><span class="num">Amsterdam Area</span> · <span data-i18n="hero_eyebrow">Workforce solutions for Dutch logistics</span></div>
+      <h1><span data-i18n="hero_h1_1">The </span><em data-i18n="hero_h1_em">people</em><span data-i18n="hero_h1_2"> behind every shift.</span></h1>
+      <p class="lede" data-i18n="hero_lede">We're an Amstelveen-based staffing partner, right in the Amsterdam region, who finds, vets, and looks after the workforce that keeps Dutch warehouses moving.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" data-page="contact"><span data-i18n="cta_request">Request workforce</span></a>
+        <a class="btn btn-ghost" data-page="services"><span data-i18n="cta_services">See our services</span></a>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head"><div class="eyebrow"><span class="num">01</span>Why we exist</div><h2 data-i18n="home_why_h">Why we exist</h2></div>
+     <div class="context-grid">
+
+  <div class="context-image">
+    <img src="team.jpg" alt="Jeff Logistics team">
+  </div>
+
+  <p data-i18n="home_why_p">
+    Dutch logistics is the engine room of European trade — but the warehouses and depots that keep it running operate on a labor market that can't keep pace. Every unfilled shift is a slower line and a missed cut-off. Jeff Logistics closes that gap with a careful, people-first vetting process that puts the right person on the floor fast, cutting downtime and recruitment overhead for operators who can't afford to wait.
+  </p>
+
+  <div class="context-quote">
+    <p class="big">
+      <span data-i18n="home_quote">"We don't recruit for everyone. We recruit for the floor — and the people who keep it running."</span>
+    </p>
+  </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div><div class="eyebrow"><span class="num">02</span>Explore</div><h2 style="margin-top:14px;" data-i18n="home_explore_h">Find what you need</h2></div>
+        <p class="desc"><span data-i18n="home_explore_desc">A quick map of the site — services, sectors, paperwork, and how to reach us.</span></p>
+      </div>
+      <div class="link-grid">
+        <div class="link-card" data-page="services">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.27 6.96 12 12l8.73-5.04M12 22.08V12"/></svg>
+          <div><h3 data-i18n="card_services_h">Services</h3><p data-i18n="card_services_p">What we offer — warehouse personnel, support teams, and flexible cover.</p></div>
+          <span class="go"><span data-i18n="card_services_go">View services →</span></span>
+        </div>
+        <div class="link-card" data-page="sectors">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"/><path d="M9 21V12h6v9"/></svg>
+          <div><h3 data-i18n="card_sectors_h">Sectors</h3><p data-i18n="card_sectors_p">Who we work with — warehouses, e-commerce, ports, and cold chain.</p></div>
+          <span class="go"><span data-i18n="card_sectors_go">View sectors →</span></span>
+        </div>
+        <div class="link-card" data-page="compliance">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12.5 11 14.5 15.5 9.5"/><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/></svg>
+          <div><h3 data-i18n="card_compliance_h">Compliance</h3><p data-i18n="card_compliance_p">The paperwork that holds up — BV, SNA, and Wtta alignment.</p></div>
+          <span class="go"><span data-i18n="card_compliance_go">View compliance →</span></span>
+        </div>
+        <div class="link-card" data-page="contact">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>
+          <div><h3 data-i18n="card_contact_h">Contact</h3><p data-i18n="card_contact_p">Tell us the shift you need covered — we'll get back within a day.</p></div>
+          <span class="go"><span data-i18n="card_contact_go">Get in touch →</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================== SERVICES ===================== -->
+<main class="page" id="page-services">
+
+  <header class="page-hero">
+    <div class="wrap page-hero-inner">
+      
+      <div class="eyebrow"><span class="num">Services</span></div>
+      <h1 data-i18n="services_h">What we offer.</h1>
+      <p class="lede" data-i18n="services_lede">Three ways we put people on your floor, scaled to whatever the week needs.</p>
+    </div>
+  </header>
+
+  <section class="tight">
+    <div class="wrap"> 
+
+<div class="service-grid">
+  <div class="sector-card">
+    <img src="service1.jpg" alt="Warehouse personnel">
+    <div>
+      <span class="mark">Service / 01</span>
+      <h3 data-i18n="s1_h">On-demand warehouse personnel</h3>
+      <p data-i18n="s1_p">Warehouse staffing for sorting, picking and packing operations.</p>
+    </div>
+  </div>
+
+  <div class="sector-card">
+    <img src="service2.jpg" alt="Logistics support">
+    <div>
+      <span class="mark">Service / 02</span>
+      <h3 data-i18n="s2_h">Logistics support teams</h3>
+      <p data-i18n="s2_p">Loading, unloading and inventory support tailored to your workflow.</p>
+    </div>
+  </div>
+
+  <div class="sector-card">
+    <img src="service3.jpg" alt="Operational support">
+    <div>
+      <span class="mark">Service / 03</span>
+      <h3 data-i18n="s3_h">Flexible operational support</h3>
+      <p data-i18n="s3_p">Extra workforce for seasonal peaks and temporary logistics projects.</p>
+    </div>
+  </div>
+</div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div><div class="eyebrow"><span class="num">02</span>How we work</div><h2 style="margin-top:14px;"><span data-i18n="process_h">From shift gap to staffed floor</span></h2></div>
+      </div>
+      <div class="process-grid">
+        <div class="process-card"><div class="step-num">01</div><h3 data-i18n="p1_h">Tell us the gap</h3><p data-i18n="p1_p">Share your shift schedule and the skills you're short on — sorting, picking, loading, or cold chain handling.</p></div>
+        <div class="process-card"><div class="step-num">02</div><h3 data-i18n="p2_h">We match &amp; vet</h3><p data-i18n="p2_p">People are sourced and checked against our standards for reliability, safety, and efficiency before they're offered.</p></div>
+        <div class="process-card"><div class="step-num">03</div><h3 data-i18n="p3_h">One contact, ongoing</h3><p data-i18n="p3_p">A dedicated account manager keeps the schedule current and the floor staffed — even as volume shifts.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="wrap">
+      <div class="cta-band-card">
+        <div><h2 data-i18n="cta_shift_h">Need a shift covered this week?</h2><p data-i18n="cta_shift_p">Tell us what you're short on — we'll come back with vetted people and a placement timeline.</p></div>
+        <a class="btn btn-invert" data-page="contact"><span data-i18n="cta_request">Request workforce</span></a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================== SECTORS ===================== -->
+<main class="page" id="page-sectors">
+
+  <header class="page-hero">
+    <div class="wrap page-hero-inner">
+      
+      <div class="eyebrow"><span class="num">Sectors</span></div>
+      <h1 data-i18n="sectors_h">Built for the floor you run.</h1>
+      <p class="lede" data-i18n="sectors_lede">Four kinds of operations we know well — and staff accordingly.</p>
+    </div>
+  </header>
+
+  <section class="tight">
+    <div class="wrap">
+      <div class="sector-grid">
+        <div class="sector-card">
+          <img src="port.jpg" alt="Port cargo logistics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"/><path d="M9 21V12h6v9"/></svg>
+          <div><span class="mark">Sector / 01</span><h3>Warehouse &amp; 3PL operators</h3></div>
+        </div>
+        <div class="sector-card">
+          <img src="ecommerce.jpg" alt="E-commerce logistics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1.5 13.5a1 1 0 0 1-1 1.5h-13a1 1 0 0 1-1-1.5L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+          <div><span class="mark">Sector / 02</span><h3>E-commerce fulfillment centers</h3></div>
+        </div>
+        <div class="sector-card">
+          <img src="warehouse.jpg" alt="Warehouse operations">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18l-2 7H5l-2-7Z"/><path d="M7 11V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v5"/><path d="M3 21h18"/></svg>
+          <div><span class="mark">Sector / 03</span><h3>Port &amp; cargo logistics — Rotterdam &amp; Schiphol</h3></div>
+        </div>
+        <div class="sector-card">
+          <img src="coldchain.jpg" alt="Cold chain logistics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M5 6l14 12M19 6 5 18M2 12h20"/></svg>
+          <div><span class="mark">Sector / 04</span><h3>Cold chain &amp; food logistics</h3></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="wrap">
+      <div class="section-head">
+        <div><div class="eyebrow"><span class="num">02</span>Why Jeff Logistics</div><h2 style="margin-top:14px;"><span data-i18n="why_h">Not a generalist agency</span></h2></div>
+        <p class="desc"><span data-i18n="why_desc">Four reasons logistics operators choose to keep us on speed-dial.</span></p>
+      </div>
+      <div class="why-grid">
+        <div class="why-item"><span class="mark"><span></span></span><div><h3 data-i18n="why1_h">Logistics only</h3><p>We don't spread across ten industries. Every person we vet is matched to a warehouse or logistics floor, not whatever sector is hiring this week.</p></div></div>
+        <div class="why-item"><span class="mark"><span></span></span><div><h3 data-i18n="why2_h">Faster placement</h3><p>Digital scheduling tools cut the time between your request and a worker on-site, instead of waiting on a generalist's intake queue.</p></div></div>
+        <div class="why-item"><span class="mark"><span></span></span><div><h3 data-i18n="why3_h">One point of contact</h3><p>A dedicated account manager learns your floor and your shift patterns — not a rotating call center.</p></div></div>
+        <div class="why-item"><span class="mark"><span></span></span><div><h3 data-i18n="why4_h">Compliance-first</h3><p>Aligned with the Wet toelating terbeschikkingstelling van arbeidskrachten (Wtta) from day one, so your contracts stay clean.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="wrap">
+      <div class="cta-band-card">
+        <div><h2 data-i18n="cta_sector_h">Recognize your floor here?</h2><p>Tell us your sector and shift pattern — we'll come back with a plan to staff it.</p></div>
+        <a class="btn btn-invert" data-page="contact"><span data-i18n="cta_request">Request workforce</span></a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================== COMPLIANCE ===================== -->
+<main class="page" id="page-compliance">
+
+  <header class="page-hero">
+    <div class="wrap page-hero-inner">
+      
+      <div class="eyebrow"><span class="num">Compliance</span></div>
+      <h1 data-i18n="compliance_h">Paperwork that holds up.</h1>
+      
+      <p class="lede" data-i18n="compliance_lede">The three checks enterprise clients ask for first — already in place.</p>
+    </div>
+  </header>
+
+  <section class="tight">
+    <div class="wrap">
+      <div class="stamp-row">
+        <div class="stamp"><div class="ring">BV</div><h3 data-i18n="stamp1_h">Registered Dutch BV</h3><p>Incorporated as Jeff Logistics B.V., a Besloten Vennootschap with recruitment, placement, and staffing services registered as a core company object.</p></div>
+        <div class="stamp"><div class="ring">SNA</div><h3 data-i18n="stamp2_h">SNA certification path</h3><p>Pursuing Stichting Normering Arbeid certification, the recognized standard in Dutch labor staffing.</p></div>
+        <div class="stamp"><div class="ring">WT</div><h3 data-i18n="stamp3_h">Wtta-aligned</h3><p>Compliant with the Dutch law governing labor intermediaries, built in from day one.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark">
+    <div class="wrap founder">
+      <div>
+        <div class="founder-avatar">
+          <img src="logo.png" alt="Jeff Logistics" class="logo-mark founder-logo">
+        </div>
+        <div class="eyebrow" style="color:var(--grey-light);">02 — Leadership</div>
+        <h2 style="margin-top:14px;">Hands-on workforce coordination, not a hiring algorithm.</h2>
+      </div>
+      <div class="founder-body">
+        <p>Jeff Logistics is led by founder Gordon Jeff Blom, who brings direct, hands-on experience coordinating logistics workforces — not a generalist recruiter learning the sector on the job. A professional network spanning the Netherlands and Scandinavia, including Blom's native Denmark, provides first-hand insight into international logistics standards and labor management, applied to every placement we make.</p>
+        <div class="founder-facts">
+          <div>FOCUS<span>Workforce coordination &amp; compliance</span></div>
+          <div>NETWORK<span>Netherlands &amp; Scandinavia</span></div>
+          <div>BASE<span>Amstelveen, Netherlands</span></div>
+          <div>SECTOR<span>Logistics &amp; warehousing only</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="wrap">
+      <div class="cta-band-card">
+        <div><h2 data-i18n="cta_compliance_h">Questions about our paperwork?</h2><p>Happy to walk procurement or HR through anything before you commit.</p></div>
+        <a class="btn btn-invert" data-page="contact">Get in touch</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================== CONTACT ===================== -->
+<main class="page" id="page-contact">
+
+  <section class="cta-section" style="padding-top:160px;">
+    <div class="wrap cta-grid">
+      <div>
+        <div class="eyebrow" style="color:var(--grey-light);"><span class="num">Contact</span></div>
+        <h2 style="margin-top:14px;" data-i18n="contact_h">Let's talk about your floor.</h2>
+        <p class="lede" data-i18n="contact_lede">Tell us the shift you need covered. We'll come back with vetted people and a placement timeline.</p>
+        <div class="contact-row">
+          <div>BASED IN<span>Amstelveen, Netherlands</span></div>
+          <div>RESPONSE TIME<span>Within 1 business day</span></div>
+        </div>
+      </div>
+      <form id="contact-form">
+        <div class="field"><label for="name">Name</label><input id="name" type="text" placeholder="Your full name" required></div>
+        <div class="field"><label for="company">Company</label><input id="company" type="text" placeholder="Company name" required></div>
+        <div class="field"><label for="email">Email</label><input id="email" type="email" placeholder="you@company.com" required></div>
+        <div class="field"><label for="message">What do you need staffed?</label><textarea id="message" rows="3" placeholder="E.g. 8 pickers, Amsterdam warehouse, starting next week"></textarea></div>
+        <button class="btn btn-invert" type="submit"><span data-i18n="cta_request">Request workforce</span></button>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+
+<!-- ===================== SHIPPING ===================== -->
+<main class="page" id="page-shipping">
+
+  <header class="page-hero">
+    <div class="wrap page-hero-inner">
+      
+      <div class="eyebrow"><span class="num">Shipping</span></div>
+      <h1 data-i18n="shipping_h">Ship anything, anywhere.</h1>
+      <p class="lede" data-i18n="shipping_lede">Select your shipment type, enter pickup and delivery — we handle the rest across Europe.</p>
+    </div>
+  </header>
+
+  <section class="tight">
+    <div class="wrap">
+
+      <div class="section-head" style="margin-bottom:32px;">
+        <div><div class="eyebrow"><span class="num">01</span>Shipment type</div><h2 style="margin-top:14px;">What are you sending?</h2></div>
+      </div>
+
+
+      <!-- Shipping progress bar -->
+      <div class="ship-progress-wrap" id="ship-progress-wrap" style="display:none;">
+        <div class="ship-progress-bar">
+          <div class="ship-progress-step active" id="prog-1">
+            <div class="ship-progress-dot">1</div>
+            <span>Shipment type</span>
+          </div>
+          <div class="ship-progress-line" id="prog-line-1"></div>
+          <div class="ship-progress-step" id="prog-2">
+            <div class="ship-progress-dot">2</div>
+            <span>Route</span>
+          </div>
+          <div class="ship-progress-line" id="prog-line-2"></div>
+          <div class="ship-progress-step" id="prog-3">
+            <div class="ship-progress-dot">3</div>
+            <span>Details</span>
+          </div>
+        </div>
+      </div>
+      <div class="ship-cat-list" id="ship-cat-grid">
+
+        <div class="ship-row" data-cat="Furniture" data-mult="1.8" onclick="shipPickCat(this)">
+          <div class="ship-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/><path d="M4 18v2M20 18v2M12 4v9"/></svg></div>
+          <div class="ship-row-body"><h3>Furniture</h3><p>Sofas, beds, wardrobes, dining tables. Assembly/disassembly available. Two-person carry for heavy items.</p></div>
+        </div>
+
+        <div class="ship-row" data-cat="Cars" data-mult="2.2" onclick="shipPickCat(this)">
+          <div class="ship-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17H5a2 2 0 0 1-2-2V9l2-4h10l2 4h2a2 2 0 0 1 2 2v4a2 2 0 0 1-1 1.73"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></div>
+          <div class="ship-row-body"><h3>Cars</h3><p>Passenger car transport, non-running vehicles, towing. Flatbed or enclosed trailer. Insurance included.</p></div>
+        </div>
+
+        <div class="ship-row" data-cat="Pallets" data-mult="1.3" onclick="shipPickCat(this)">
+          <div class="ship-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="14" width="20" height="3" rx="1"/><path d="M5 14V8M9 14V8M13 14V8M17 14V8"/><rect x="4" y="5" width="16" height="3" rx="1"/><path d="M3 17v2M7 17v2M17 17v2M21 17v2"/></svg></div>
+          <div class="ship-row-body"><h3>Pallets</h3><p>Standard (120×80 cm) and Euro pallets. Single or multiple. Forklift-ready delivery and tail-lift trucks available.</p></div>
+        </div>
+
+        <div class="ship-row" data-cat="Parcels" data-mult="1.0" onclick="shipPickCat(this)">
+          <div class="ship-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.27 6.96 12 12l8.73-5.04M12 22.08V12"/></svg></div>
+          <div class="ship-row-body"><h3>Parcels</h3><p>Boxes and small packages up to 30 kg. Door-to-door, same-day or next-day. Signature on delivery included.</p></div>
+        </div>
+
+        <div class="ship-row" data-cat="Full Truckloads" data-mult="3.0" onclick="shipPickCat(this)">
+          <div class="ship-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+          <div class="ship-row-body"><h3>Full Truckloads</h3><p>Full trailer loads and bulk freight. 20–90 m³ capacity. Loading crew and cargo securing equipment included.</p></div>
+        </div>
+
+        <div class="ship-row" data-cat="Vehicles &amp; Machinery" data-mult="2.5" onclick="shipPickCat(this)">
+          <div class="ship-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M12 12v5M9.5 12v5M14.5 12v5"/></svg></div>
+          <div class="ship-row-body"><h3>Vehicles &amp; Machinery</h3><p>Vans, forklifts, excavators, generators. Low-loader trailers and crane assistance available on request.</p></div>
+        </div>
+
+        <div class="ship-row" data-cat="Motorcycles &amp; Scooters" data-mult="1.6" onclick="shipPickCat(this)">
+          <div class="ship-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M5 17H3V10l4-4h5l3 4h3l1 3"/><path d="M12 6V3"/></svg></div>
+          <div class="ship-row-body"><h3>Motorcycles &amp; Scooters</h3><p>Motorbikes, mopeds, e-scooters, quads. Secured with straps in enclosed van. Running and non-running accepted.</p></div>
+        </div>
+
+        <div class="ship-row" data-cat="Removals" data-mult="2.0" onclick="shipPickCat(this)">
+          <div class="ship-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z"/><path d="M9 21V12h6v9"/></svg></div>
+          <div class="ship-row-body"><h3>Removals</h3><p>Full home and office relocations. Packing, disassembly, loading, transport and setup at destination. Studio to 5-bedroom.</p></div>
+        </div>
+
+        <div class="ship-row" data-cat="Pets" data-mult="1.5" onclick="shipPickCat(this)">
+          <div class="ship-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5.172C10 3.782 8.423 2.679 6.5 3c-2.823.47-4.113 6.006-4 7 .08.703 1.725 1.722 3.656 1 1.261-.472 1.96-1.45 2.344-2.5"/><path d="M14.267 5.172c0-1.39 1.577-2.493 3.5-2.172 2.823.47 4.113 6.006 4 7-.08.703-1.725 1.722-3.656 1-1.261-.472-1.96-1.45-2.344-2.5"/><path d="M8 14v.5M16 14v.5"/><path d="M4.42 11.247A13.152 13.152 0 0 0 4 14.556C4 18.728 7.582 21 12 21s8-2.272 8-6.444c0-1.061-.162-2.2-.493-3.309"/></svg></div>
+          <div class="ship-row-body"><h3>Pets</h3><p>Safe, stress-free transport for dogs, cats, and small animals. Climate-controlled vans, experienced handlers.</p></div>
+        </div>
+
+        <div class="ship-row" data-cat="Other" data-mult="1.2" onclick="shipPickCat(this)">
+          <div class="ship-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
+          <div class="ship-row-body"><h3>Other</h3><p>Antiques, sports equipment, musical instruments, building materials. Describe your item and we'll find the right solution.</p></div>
+        </div>
+
+      </div>
+
+      <!-- CATEGORY DETAILS PANEL — appears after picking a category -->
+      <div id="ship-cat-details" style="display:none; margin-top:2px; border:1px solid var(--line-light); background:var(--paper);">
+        <div id="ship-cat-details-inner"></div>
+        <div style="padding:20px 24px; border-top:1px solid var(--line-light); display:flex; justify-content:flex-end;">
+          <button class="btn btn-primary" onclick="shipOpenForm()">Continue to address &rarr;</button>
+        </div>
+      </div>
+
+      <!-- BOOKING FORM -->
+      <div class="ship-form-wrap" id="ship-form-wrap" style="display:none; margin-top:56px;">
+
+        <div class="ship-progress-bar"><div class="ship-progress-fill" id="ship-progress-fill"></div></div>
+        <div class="ship-step-header">
+          <div><div class="eyebrow"><span class="num">02</span>Booking details</div><h2 style="margin-top:14px;">Where to &amp; from?</h2></div>
+          <div id="ship-selected-badge" class="ship-badge"></div>
+        </div>
+
+        <!-- Step 1: Route + Map -->
+        <div id="ship-step-1">
+          <div class="ship-layout">
+
+            <!-- Map: left -->
+            <div class="ship-map-side" id="ship-map-container">
+              <div id="ship-leaflet-map" style="width:100%;height:100%;min-height:420px;"></div>
+            </div>
+
+            <!-- Inputs: right -->
+            <div class="ship-inputs-side">
+
+              <!-- Mode toggle -->
+              <div class="ship-mode-toggle">
+                <button class="ship-mode-btn active" id="ship-mode-type" onclick="shipSetMode('type')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                  Type address
+                </button>
+                <button class="ship-mode-btn" id="ship-mode-pin" onclick="shipSetMode('pin')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Pin on map
+                </button>
+              </div>
+
+              <!-- Pin mode hint -->
+              <div class="ship-pin-hint" id="ship-pin-hint" style="display:none;">
+                <div class="ship-pin-steps">
+                  <div class="ship-pin-step-card" id="ship-pin-step-from">
+                    <div class="ship-pin-step-num green">1</div>
+                    <div class="ship-pin-step-info">
+                      <span class="ship-pin-step-title">Pickup location</span>
+                      <span class="ship-pin-step-sub" id="ship-pin-from-val">Click anywhere on the map</span>
+                    </div>
+                    <div class="ship-pin-step-status" id="ship-pin-from-check" style="display:none;">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;stroke:#2A7D4F;"><path d="M20 6 9 17l-5-5"/></svg>
+                    </div>
+                    <button class="ship-pin-clear" id="ship-pin-clear-from" onclick="shipClearPin('from')" style="display:none;" title="Clear pickup">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:12px;height:12px;"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                  <div class="ship-pin-connector"></div>
+                  <div class="ship-pin-step-card muted" id="ship-pin-step-to">
+                    <div class="ship-pin-step-num red">2</div>
+                    <div class="ship-pin-step-info">
+                      <span class="ship-pin-step-title">Delivery location</span>
+                      <span class="ship-pin-step-sub" id="ship-pin-to-val">Set pickup first</span>
+                    </div>
+                    <div class="ship-pin-step-status" id="ship-pin-to-check" style="display:none;">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;stroke:#B03A2E;"><path d="M20 6 9 17l-5-5"/></svg>
+                    </div>
+                    <button class="ship-pin-clear" id="ship-pin-clear-to" onclick="shipClearPin('to')" style="display:none;" title="Clear delivery">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:12px;height:12px;"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ship-route-box" id="ship-route-box">
+                <div class="ship-route-field">
+                  <span class="ship-dot ship-dot--green"></span>
+                  <div class="ship-route-input-wrap">
+                    <label for="sh-from-input">Pickup address</label>
+                    <input id="sh-from-input" type="text" placeholder="Start typing a city or address..." autocomplete="off" oninput="shipGeocode('from'); shipAutocomplete('from', this.value)">
+                    <div class="ship-autocomplete-drop" id="sh-from-drop"></div>
+                  </div>
+                </div>
+                <div class="ship-route-sep" style="position:relative;">
+                  <button class="ship-swap-btn" onclick="shipSwapLocations()" title="Swap pickup and delivery">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M7 16V4m0 0L3 8m4-4 4 4"/><path d="M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
+                  </button>
+                </div>
+                <div class="ship-route-field">
+                  <span class="ship-dot ship-dot--red"></span>
+                  <div class="ship-route-input-wrap">
+                    <label for="sh-to-input">Delivery address</label>
+                    <input id="sh-to-input" type="text" placeholder="Start typing a city or address..." autocomplete="off" oninput="shipGeocode('to'); shipAutocomplete('to', this.value)">
+                    <div class="ship-autocomplete-drop" id="sh-to-drop"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Distance info -->
+              <div class="ship-distance-box" id="ship-distance-box" style="display:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex:none;color:var(--gold);"><path d="M3 12h18M13 6l6 6-6 6"/></svg>
+                <div>
+                  <div class="ship-distance-num" id="ship-distance-km">— km</div>
+                  <div class="ship-distance-label" id="ship-distance-route">Straight-line distance</div>
+                </div>
+              </div>
+
+              <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:auto;" onclick="shipGoStep2()">Continue &rarr;</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Step 2: Details -->
+        <div id="ship-step-2" style="display:none;">
+          <button class="ship-back-btn" onclick="shipGoStep1()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;margin-left:4px;"><path d="m15 18-6-6 6-6"/></svg>
+            Back
+          </button>
+
+          <div class="ship-form-grid" style="margin-top:24px;">
+            <div class="ship-form-block">
+              <div class="detail-section-head">
+                <div class="detail-section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                </div>
+                <div>
+                  <p class="detail-section-title">Your details</p>
+                  <p class="detail-section-sub">Contact information for pickup &amp; delivery</p>
+                </div>
+              </div>
+
+              <div class="detail-field-group">
+                <div class="detail-field">
+                  <div class="detail-field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                  </div>
+                  <div class="detail-field-wrap">
+                    <label for="sh-sender">Sender name <span class="req">*</span></label>
+                    <input id="sh-sender" type="text" placeholder="Your full name" required autocomplete="name">
+                    <span class="field-err" id="err-sender">Required</span>
+                  </div>
+                </div>
+
+                <div class="detail-field">
+                  <div class="detail-field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.6 19a19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.92-8.18A2 2 0 0 1 3.68 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+                  </div>
+                  <div class="detail-field-wrap">
+                    <label for="sh-phone">Phone number <span class="req">*</span></label>
+                    <input id="sh-phone" type="tel" placeholder="+31 6 ..." required autocomplete="tel">
+                    <span class="field-err" id="err-phone">Required</span>
+                  </div>
+                </div>
+
+                <div class="detail-field">
+                  <div class="detail-field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </div>
+                  <div class="detail-field-wrap">
+                    <label for="sh-recv">Recipient name <span class="req">*</span></label>
+                    <input id="sh-recv" type="text" placeholder="Who will receive the shipment" required>
+                    <span class="field-err" id="err-recv">Required</span>
+                  </div>
+                </div>
+
+                <div class="detail-field">
+                  <div class="detail-field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z"/><path d="m22 6-10 7L2 6"/></svg>
+                  </div>
+                  <div class="detail-field-wrap">
+                    <label for="sh-email">Email address</label>
+                    <input id="sh-email" type="email" placeholder="For booking confirmation" autocomplete="email">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ship-form-block">
+              <div class="detail-section-head">
+                <div class="detail-section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </div>
+                <div>
+                  <p class="detail-section-title">Schedule &amp; size</p>
+                  <p class="detail-section-sub">Pick a date, time window and weight</p>
+                </div>
+              </div>
+
+              <div class="detail-field-group">
+                <div class="detail-field" style="flex-direction:column;align-items:stretch;gap:0;padding-bottom:0;">
+                  <label style="font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--grey);margin-bottom:10px;">Pickup date <span class="req">*</span></label>
+                  <input type="hidden" id="sh-date" required>
+                  <span class="field-err" id="err-date">Please select a date</span>
+                  <div class="simple-datepicker" id="simple-datepicker" style="width:100%;"></div>
+                </div>
+
+                <div class="detail-field">
+                  <div class="detail-field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  </div>
+                  <div class="detail-field-wrap">
+                    <label for="sh-time">Time window</label>
+                    <select id="sh-time" style="width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--line-light);font-family:var(--font-body);font-size:15px;color:var(--black);padding:4px 0 8px;outline:none;border-radius:0;cursor:pointer;">
+                      <option>08:00 – 12:00</option>
+                      <option>12:00 – 16:00</option>
+                      <option>16:00 – 20:00</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="detail-field">
+                  <div class="detail-field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+                  </div>
+                  <div class="detail-field-wrap">
+                    <label for="sh-weight">Approximate weight</label>
+                    <select id="sh-weight" style="width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--line-light);font-family:var(--font-body);font-size:15px;color:var(--black);padding:4px 0 8px;outline:none;border-radius:0;cursor:pointer;">
+                      <option value="5">Under 5 kg</option>
+                      <option value="20">5 – 20 kg</option>
+                      <option value="100">20 – 100 kg</option>
+                      <option value="200">Over 100 kg</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional notes -->
+          <div class="ship-form-block" style="margin-top:1px;border:1px solid var(--line-light);">
+            <div class="detail-section-head" style="margin-bottom:14px;">
+              <div class="detail-section-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+              </div>
+              <div>
+                <p class="detail-section-title">Additional notes</p>
+                <p class="detail-section-sub">Floor number, elevator, fragile items, access restrictions</p>
+              </div>
+            </div>
+            <textarea id="sh-notes" rows="3" placeholder="e.g. 3rd floor, no elevator, ring bell twice..." style="width:100%;background:transparent;border:1px solid var(--line-light);border-radius:2px;font-family:var(--font-body);font-size:14px;color:var(--black);padding:12px 14px;outline:none;resize:none;transition:border-color .15s;" onfocus="this.style.borderColor='var(--black)'" onblur="this.style.borderColor='var(--line-light)'"></textarea>
+          </div>
+
+          <div style="margin-top:28px;">
+            <button class="btn btn-primary" onclick="shipSubmit()">Book shipment &rarr;</button>
+          </div>
+
+          <div id="ship-success" style="display:none;margin-top:24px;padding:24px 28px;background:var(--paper-2);border-left:3px solid var(--gold);">
+            <p style="font-family:var(--font-display);font-size:18px;margin-bottom:8px;">Booking confirmed.</p>
+            <p id="ship-success-detail" style="color:var(--grey);font-size:14px;"></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="wrap">
+      <div class="cta-band-card">
+        <div><h2>Need a recurring delivery route?</h2><p>Talk to us about regular shipments and volume pricing across Europe.</p></div>
+        <a class="btn btn-invert" data-page="contact">Get in touch</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+
+<!-- 404 page -->
+<main class="page" id="page-404" style="min-height:80vh;align-items:center;justify-content:center;">
+  <div class="wrap" style="text-align:center;padding:120px 32px;">
+    <div style="font-family:var(--font-display);font-size:clamp(80px,15vw,160px);font-weight:300;color:var(--paper-2);line-height:1;margin-bottom:0;">404</div>
+    <h1 style="font-size:clamp(24px,4vw,40px);font-weight:300;margin-bottom:16px;margin-top:-16px;">Page not found</h1>
+    <p style="color:var(--grey);font-size:16px;max-width:400px;margin:0 auto 36px;">The page you're looking for doesn't exist or has been moved.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a class="btn btn-primary" data-page="home">Go home</a>
+      <a class="btn btn-ghost" data-page="contact">Contact us</a>
+    </div>
+  </div>
+</main>
+
+<!-- ===================== FOOTER (shared) ===================== -->
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="brand-mark" data-page="home">
+          <img src="W logo.png" alt="Jeff Logistics" class="logo-mark footer-logo">
+        </span>
+        <p data-i18n="footer_tagline">Workforce solutions for Dutch logistics, based in Amstelveen.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a data-page="home">Why We Exist</a>
+        <a data-page="services">How We Work</a>
+        <a data-page="compliance" data-i18n="nav_compliance">Compliance</a>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <a data-page="services">Warehouse Personnel</a>
+        <a data-page="services">Logistics Support Teams</a>
+        <a data-page="sectors">Sectors We Serve</a>
+        <a data-page="shipping">Ship a Package</a>
+        
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <span>Amsterdam, Netherlands</span>
+        <a data-page="contact">Request Workforce</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Jeff Logistics B.V. All rights reserved.</span>
+      <span>Registered as Jeff Logistics B.V. — Wtta-aligned</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js" defer></script>
+
+
+<!-- WhatsApp float -->
+
+<!-- Cookie consent -->
+
+<!-- WhatsApp float -->
+<a class="wa-float" href="https://wa.me/31612345678" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" style="width:26px;height:26px;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.134.558 4.133 1.532 5.868L.073 23.27a.75.75 0 0 0 .912.912l5.403-1.459A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.734 9.734 0 0 1-4.964-1.355l-.356-.213-3.695.998.998-3.695-.213-.356A9.734 9.734 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+</a>
+
+<!-- Search overlay -->
+<div class="search-overlay" id="search-overlay" style="display:none;">
+  <div class="search-modal">
+    <div class="search-header">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex:none;color:var(--grey);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="search-input" type="text" placeholder="Search pages, services, sectors..." autocomplete="off" oninput="searchQuery(this.value)" onkeydown="searchKeydown(event)">
+      <button onclick="searchClose()" aria-label="Close search" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:18px;height:18px;color:var(--grey);"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="search-results" id="search-results">
+      <p class="search-hint">Type to search across the site…</p>
+    </div>
+  </div>
+</div>
+
+<!-- Scroll to top -->
+<button class="scroll-top-btn" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" style="display:none;">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="m18 15-6-6-6 6"/></svg>
+</button>
+</body>
+</html>
