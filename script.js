@@ -1,5 +1,5 @@
 (function(){
-  var pages = ['home','services','sectors','compliance','shipping','contact'];
+  var pages = ['home','about','services','sectors','compliance','shipping','jobs','contact'];
 
   function showPage(id){
     if(pages.indexOf(id) === -1){ id = 'home'; }
@@ -920,17 +920,6 @@ window.langSelect = function(btn){
   }
 })();
 
-// ===== DARK MODE =====
-(function(){
-  var saved = localStorage.getItem('jeff_theme');
-  if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
-})();
-
-window.toggleDarkMode = function(){
-  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  localStorage.setItem('jeff_theme', isDark ? 'light' : 'dark');
-};
 
 // ===== COOKIE BANNER =====
 (function(){
@@ -1176,3 +1165,20 @@ document.addEventListener('keydown', function(e){
     sdpRender();
   };
 })();
+
+
+// ===== JOBS FORM =====
+window.jobsSubmit = function(){
+  var name  = document.getElementById('job-name').value.trim();
+  var email = document.getElementById('job-email').value.trim();
+  var phone = document.getElementById('job-phone').value.trim();
+  var role  = document.getElementById('job-role').value;
+  if(!name || !email || !phone){
+    alert('Please fill in your name, email, and phone number.');
+    return;
+  }
+  var detail = document.getElementById('jobs-success-detail');
+  detail.textContent = 'Thanks ' + name + '! We received your application' + (role ? ' for ' + role : '') + '. We will be in touch within 2 working days.';
+  document.getElementById('jobs-success').style.display = 'block';
+  document.getElementById('jobs-success').scrollIntoView({behavior:'smooth'});
+};
